@@ -1,26 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Grid } from "@mui/material";
+import { useCurrentJoke } from "./fetchers/jokeFetcher";
+import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
+import GetNewJokesSection from "./components/GetNewJokesSection/GetNewJokesSection";
+import JokeSection from "./components/JokeSection/JokeSection";
+import PunchlineSection from "./components/PunchlineSection/PunchlineSection";
+import { useState } from "react";
+import ShowPunchlineButton from "./components/PunchlineSection/ShowPunchlineButton";
+import ErrorLoadingJoke from "./components/ErrorLoadingJoke/ErrorLoadingJoke";
 
-function App() {
+export default function App() {
+  const { currentJoke, currentJokeLoading, mutateCurrentJoke } =
+    useCurrentJoke();
+  const [showPunchline, setShowPunchline] = useState<boolean>(false);
+
+  const handleGetNewJoke = () => {
+    mutateCurrentJoke();
+    setShowPunchline(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Grid container spacing={4}>
+        <GetNewJokesSection handleClick={handleGetNewJoke} />
+      </Grid>
+      {currentJokeLoading ? (
+        <LoadingSpinner />
+      ) : currentJoke ? (
+        <Grid container paddingTop={5} spacing={10}>
+          <JokeSection joke={currentJoke?.joke} />
+          <ShowPunchlineButton
+            showPunchline={showPunchline}
+            setShowPunchline={setShowPunchline}
+          />
+          <PunchlineSection
+            punchline={currentJoke?.punchLine}
+            showPunchline={showPunchline}
+          />
+        </Grid>
+      ) : (
+        <ErrorLoadingJoke />
+      )}
+    </>
   );
 }
-
-export default App;
